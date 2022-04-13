@@ -1,6 +1,6 @@
-# xsh-lib/template
+# xsh-lib/git
 
-xsh Library - template.
+xsh Library - git.
 
 About xsh and its libraries, check out [xsh document](https://github.com/alexzhangs/xsh)
 
@@ -29,15 +29,15 @@ Assume [xsh](https://github.com/alexzhangs/xsh) is already installed at your loc
 To load this library into `xsh` issue below command:
 
 ```bash
-xsh load xsh-lib/template
+xsh load xsh-lib/git
 ```
 
-The loaded library can be referred as name `template`.
+The loaded library can be referred as name `git`.
 
 ## Usage
 
 List available utilities for this library:
 
 ```bash
-xsh list template
+xsh list git
 ```
