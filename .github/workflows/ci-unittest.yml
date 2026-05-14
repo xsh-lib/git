@@ -23,17 +23,12 @@ jobs:
         # shellcheck disable=SC1090
         source ~/.xshrc
         xsh load xsh-lib/core
-        # Load this lib at the same branch we're testing. Falls back to the
-        # default branch if the branch hasn't been pushed yet (e.g. PR from a
-        # fork). The local checkout is what test.sh exercises via xsh, so this
-        # ensures the version under test matches the workflow run.
+        # Load this lib at the branch under test. xsh load does a full clone
+        # from origin and checks out the branch, so the workflow exercises the
+        # commit that triggered it. Fork PRs fall back to the default branch
+        # (the source branch isn't on the main repo).
         BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
         xsh load -b "$BRANCH" xsh-lib/git || xsh load xsh-lib/git
-        # Swap the loaded copy for this checkout so the workflow tests the
-        # exact files in this commit, not whatever was last pushed.
-        REPO_HOME="$HOME/.xsh/repo/xsh-lib/git"
-        rm -rf "$REPO_HOME"
-        cp -R "$GITHUB_WORKSPACE" "$REPO_HOME"
 
     - name: Run tests
       run: |
