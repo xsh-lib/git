@@ -35,7 +35,7 @@ This project is still at version `0.x` and should be considered immature.
    xsh load xsh-lib/core
    ```
 
-2. Some utilities have additional dependencies (e.g. `gh`, `w3m`,
+2. Some utilities have additional dependencies (e.g. `gh`, `ssh`, `w3m`,
    `collaborator`). See the per-utility help for details.
 
 
@@ -75,43 +75,87 @@ xsh help git/<package>/<util>
 
 | Utility                       | Kind     | Purpose                                                                                                          |
 |-------------------------------|----------|------------------------------------------------------------------------------------------------------------------|
-| `git/hub/account-for-email`   | function | Look up a `gh` account name for an email via `XSH_GIT_HUB_ACCOUNT_MAP`.                                          |
-| `git/hub/account-for-repo`    | function | Derive the `gh` account for the current repo from `git config user.email`, using the same mapping.               |
+| `git/hub/account-for-email`   | function | Walk `XSH_GIT_HUB_ACCOUNTS`, return the account whose email matches.                                             |
+| `git/hub/account-for-org`     | function | Walk `XSH_GIT_HUB_ACCOUNTS`, return the account that defaults for the given GitHub org. First-match-wins.        |
+| `git/hub/account-for-repo`    | function | Derive the account from `git config user.email` in the current repo (delegates to `account-for-email`).          |
 | `git/hub/run`                 | function | Run a command with a chosen `gh` account active, isolated from concurrent shell sessions via per-call `GH_CONFIG_DIR`. |
+| `git/hub/ssh`                 | script   | SSH wrapper for `core.sshCommand`: picks the right per-account key from the repo owner in git's command line.    |
 | `git/hub/collaborator`        | function | Add, remove, or list collaborators of the current GitHub repo. Requires `collaborator` and `w3m`.                |
 | `git/rebase-i-in-dumb-term`   | script   | Helper for running `git rebase -i` in dumb terminals.                                                             |
+
+
+### The account profile env var: `XSH_GIT_HUB_ACCOUNTS`
+
+The `git/hub/*` utilities read a single env var that describes every gh
+account you operate. Whitespace-separated records, each with three
+colon-separated fields:
+
+```
+<account> : <email> : <org>[,<org>...]
+```
+
+| Field | Cardinality | Meaning |
+|---|---|---|
+| `account` | required | gh account name; also the suffix in `~/.ssh/github-<account>`. |
+| `email`   | 0..1     | Email tied to this account by `~/.gitconfig` `includeIf` rules. Empty for bot-style accounts with no per-directory binding. |
+| `orgs`    | 0..N     | Comma-separated GitHub orgs this account defaults for. Read by `account-for-org` and `git/hub/ssh`. |
+
+Example:
+
+```bash
+export XSH_GIT_HUB_ACCOUNTS="alice:alice@example.com:alice,xsh-alice bob:bob@corp.io:bob-corp"
+```
+
+If two records list the same org, **first match wins** — the earlier
+record's account becomes the default for that org. The other account is
+still reachable via the explicit SSH alias URL
+`git@github-<account>:<org>/<repo>.git`.
 
 
 ### Multi-`gh`-account workflow
 
 If you operate multiple GitHub accounts simultaneously (e.g. personal +
 work) and rely on `~/.gitconfig`'s `includeIf "gitdir:..."` rules to switch
-identities per directory tree, the `git/hub/*` utilities make it transparent
-to push/PR/etc. against the right account without ever mutating the global
+identities per directory tree, this library makes it transparent to push,
+PR, and clone against the right account without ever mutating the global
 active account in `~/.config/gh`.
 
-1. Map your emails to `gh` account names via an env var:
+1. Map your accounts via the env var described above.
+
+2. Use `git/hub/run` as a transparent wrapper around any `gh` command
+   (account auto-derived from the current repo's `user.email`):
 
    ```bash
-   export XSH_GIT_HUB_ACCOUNT_MAP="alice@personal.com=alice alice@corp.io=alice-corp"
-   ```
-
-2. Use `git/hub/run` as a transparent wrapper around any `git` or `gh`
-   command. The account is auto-derived from the current repo's
-   `user.email`:
-
-   ```bash
-   xsh git/hub/run -- git push origin main
    xsh git/hub/run -- gh pr create --fill
    xsh git/hub/run -u alice-corp -- gh pr list   # explicit override
    ```
 
    Each call snapshots `~/.config/gh` to a private mode-700 tempdir,
-   `gh auth switch -u <account>` runs against the **copy**, and
-   `GH_CONFIG_DIR` is exported only for the wrapped command. The real
-   config is never mutated, so other shell sessions and credential-helper
-   invocations are unaffected — even when several `git/hub/run` calls are
-   in flight at the same time.
+   runs `gh auth switch -u <account>` against the **copy**, and exports
+   `GH_CONFIG_DIR` only for the wrapped command. The real config is never
+   mutated, so other shell sessions and credential-helper invocations are
+   unaffected — even when several `git/hub/run` calls are in flight at the
+   same time.
+
+3. Wire `git/hub/ssh` into git for transparent SSH routing on bare
+   `git@github.com:<org>/<repo>.git` URLs:
+
+   ```bash
+   xsh imports git/hub/ssh
+   git config --global core.sshCommand git-hub-ssh
+   ```
+
+   Now `git clone git@github.com:<org>/<repo>.git` (or `gh repo clone`,
+   or the web "Clone with SSH" copy-paste) auto-resolves to the right
+   `~/.ssh/github-<account>` key — without rewriting the URL stored in
+   the cloned `origin`. SSH key selection happens in the wrapper based on
+   the org parsed from git's `git-{upload,receive}-pack` command line.
+
+   The wrapper falls through to plain `ssh` for any host that isn't
+   `git@github.com` (CodeCommit, EC2, the per-account `github-<name>`
+   aliases, etc.) and for any org that isn't in
+   `XSH_GIT_HUB_ACCOUNTS` — letting your existing SSH config handle
+   those cases unchanged.
 
 
 ## Development

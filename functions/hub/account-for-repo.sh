@@ -8,8 +8,8 @@
 #?
 #? Dependency:
 #?   1. xsh git/hub/account-for-email
-#?   2. The env var XSH_GIT_HUB_ACCOUNT_MAP must contain a mapping for the
-#?      repo's email. See `xsh help /git/hub/account-for-email`.
+#?   2. The env var XSH_GIT_HUB_ACCOUNTS must contain a record for the
+#?      repo's email. See `xsh help git/hub/account-for-email`.
 #?
 #? Usage:
 #?   @account-for-repo
@@ -31,7 +31,7 @@ function account-for-repo () {
     fi
     if ! account=$(xsh git/hub/account-for-email "$email"); then
         printf 'account-for-repo: no gh account mapped for %s\n' "$email" >&2
-        printf '  add "<email>=<account>" to XSH_GIT_HUB_ACCOUNT_MAP\n' >&2
+        printf '  add a record with this email to XSH_GIT_HUB_ACCOUNTS\n' >&2
         return 1
     fi
     printf '%s\n' "$account"
