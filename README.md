@@ -2,7 +2,8 @@
 [![GitHub](https://img.shields.io/github/license/xsh-lib/git.svg?style=flat-square)](https://github.com/xsh-lib/git/)
 [![GitHub last commit](https://img.shields.io/github/last-commit/xsh-lib/git.svg?style=flat-square)](https://github.com/xsh-lib/git/commits/main)
 
-[![ci-unittest](https://github.com/xsh-lib/git/actions/workflows/ci-unittest.yml/badge.svg)](https://github.com/xsh-lib/git/actions/workflows/ci-unittest.yml)
+[![CI](https://github.com/xsh-lib/git/actions/workflows/ci.yml/badge.svg)](https://github.com/xsh-lib/git/actions/workflows/ci.yml)
+[![CodeFactor](https://www.codefactor.io/repository/github/xsh-lib/git/badge)](https://www.codefactor.io/repository/github/xsh-lib/git)
 [![GitHub issues](https://img.shields.io/github/issues/xsh-lib/git.svg?style=flat-square)](https://github.com/xsh-lib/git/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/xsh-lib/git.svg?style=flat-square)](https://github.com/xsh-lib/git/pulls)
 
@@ -18,13 +19,18 @@ About xsh and its libraries, check out the [xsh document](https://github.com/ale
 
 ## Requirements
 
-Tested with bash:
+`xsh-lib/git` is tested in CI ([GitHub Actions](https://github.com/xsh-lib/git/actions/workflows/ci.yml)) on every push and pull request, across the following shell/OS combinations:
 
-* 5.x and 4.x on Linux (ubuntu-latest in CI)
-* 3.2.57 on macOS (macos-latest in CI)
+| Shell | Version | OS                    | Tested |
+|-------|---------|-----------------------|:------:|
+| bash  | 3.2     | macOS                 | ✅     |
+| bash  | 4.4     | Linux (rockylinux:8)  | ✅     |
+| bash  | 5.x     | Linux (ubuntu-latest) | ✅     |
+| bash  | 5.x     | macOS (Homebrew)      | ✅     |
+| zsh   | 5.x     | Linux (ubuntu-latest) | ✅     |
+| zsh   | 5.x     | macOS                 | ✅     |
 
-The utilities also run under **zsh** (the default shell on modern macOS); xsh
-executes them under zsh's ksh emulation. Tested with zsh 5.x.
+zsh utilities run under xsh's ksh emulation and require **xsh ≥ 0.7.0**.
 
 This project is still at version `0.x` and should be considered immature.
 
@@ -182,6 +188,5 @@ Network-dependent tests (real `gh` round-trips) are skipped by default.
 Enable them with `XSH_GIT_TEST_NETWORK=1` once you have a logged-in `gh`
 account available.
 
-CI runs the same `test.sh` on `ubuntu-latest` and `macos-latest` for every
-push and PR. See the
-[ci-unittest workflow](.github/workflows/ci-unittest.yml).
+CI runs the same `test.sh` across the shell/OS matrix above for every push and
+PR. See the [CI workflow](.github/workflows/ci.yml).
