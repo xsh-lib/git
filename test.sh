@@ -15,6 +15,15 @@
 # unless XSH_GIT_TEST_NETWORK=1 is set explicitly.
 #
 
+# Make the `xsh` function available when run as a child process. Under bash it
+# is inherited as an exported function (no-op here); zsh cannot export functions,
+# so a child `zsh test.sh` sources ~/.xshrc to define xsh as a real zsh function
+# (otherwise it would only see the bin/xsh shim, which runs bash).
+if ! type xsh 2>/dev/null | grep -q 'function'; then
+    # shellcheck source=/dev/null
+    . ~/.xshrc
+fi
+
 set -e -o pipefail
 
 # xsh's __xsh_clean unsets XSH_DEV on every RETURN trap, so a script that makes

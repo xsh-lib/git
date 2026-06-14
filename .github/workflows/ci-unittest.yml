@@ -5,13 +5,21 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ${{ matrix.os }}
+    name: ${{ matrix.os }} / ${{ matrix.shell }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
+        # bash is the historical target; zsh is the macOS default login shell.
+        # Utilities run under zsh's ksh emulation (provided by xsh).
+        shell: [bash, zsh]
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Install zsh (Linux)
+      if: matrix.shell == 'zsh' && runner.os == 'Linux'
+      run: sudo apt-get update && sudo apt-get install -y zsh
 
     - name: Install xsh
       run: |
@@ -30,10 +38,13 @@ jobs:
         BRANCH="${GITHUB_HEAD_REF:-${GITHUB_REF_NAME}}"
         xsh load -b "$BRANCH" xsh-lib/git || xsh load xsh-lib/git
 
-    - name: Run tests
+    - name: Run tests (${{ matrix.shell }})
       run: |
         # shellcheck disable=SC1090
         source ~/.xshrc
         xsh version
         xsh list
-        bash test.sh
+        # test.sh self-sources ~/.xshrc, so running it under the matrix shell
+        # makes the utilities execute under that shell (bash, or zsh's ksh
+        # emulation).
+        ${{ matrix.shell }} test.sh

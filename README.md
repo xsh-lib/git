@@ -23,6 +23,9 @@ Tested with bash:
 * 5.x and 4.x on Linux (ubuntu-latest in CI)
 * 3.2.57 on macOS (macos-latest in CI)
 
+The utilities also run under **zsh** (the default shell on modern macOS); xsh
+executes them under zsh's ksh emulation. Tested with zsh 5.x.
+
 This project is still at version `0.x` and should be considered immature.
 
 
