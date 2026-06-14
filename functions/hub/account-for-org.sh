@@ -35,8 +35,11 @@ function account-for-org () {
     for record in $XSH_GIT_HUB_ACCOUNTS; do
         IFS=':' read -r r_account _ r_orgs_csv <<< "$record"
         [[ -z $r_orgs_csv ]] && continue
-        IFS=',' read -ra r_orgs <<< "$r_orgs_csv"
-        for o in "${r_orgs[@]}"; do
+        # split the CSV on comma. `read -a` is bash-only (zsh's read has no -a,
+        # and -A differs); org names never contain spaces, so replacing commas
+        # with spaces and word-splitting is portable across bash and zsh.
+        # shellcheck disable=SC2086
+        for o in ${r_orgs_csv//,/ }; do
             if [[ $o == "$org" ]]; then
                 printf '%s\n' "$r_account"
                 return 0
