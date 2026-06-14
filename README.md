@@ -3,6 +3,7 @@
 [![GitHub last commit](https://img.shields.io/github/last-commit/xsh-lib/git.svg?style=flat-square)](https://github.com/xsh-lib/git/commits/main)
 
 [![CI](https://github.com/xsh-lib/git/actions/workflows/ci.yml/badge.svg)](https://github.com/xsh-lib/git/actions/workflows/ci.yml)
+[![CodeFactor](https://www.codefactor.io/repository/github/xsh-lib/git/badge)](https://www.codefactor.io/repository/github/xsh-lib/git)
 [![GitHub issues](https://img.shields.io/github/issues/xsh-lib/git.svg?style=flat-square)](https://github.com/xsh-lib/git/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/xsh-lib/git.svg?style=flat-square)](https://github.com/xsh-lib/git/pulls)
 
