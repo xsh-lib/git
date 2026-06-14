@@ -13,11 +13,6 @@ jobs:
         # bash is the historical target; zsh is the macOS default login shell.
         # Utilities run under zsh's ksh emulation (provided by xsh).
         shell: [bash, zsh]
-    # The zsh jobs install xsh from alexzhangs/xsh master, which doesn't yet
-    # carry zsh support — so they stay red until that release lands. Keep them
-    # non-blocking until then. TODO: remove once a zsh-supporting xsh is
-    # released to master.
-    continue-on-error: ${{ matrix.shell == 'zsh' }}
 
     steps:
     - uses: actions/checkout@v4
